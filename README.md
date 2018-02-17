@@ -16,7 +16,7 @@ There are a lot of tweets about science, so to make the search a little easier I
 about science news. Here's the list:
 
 Scientific journals (based on impact factor):
-Nature (@nature)
+Nature (@nature)\n
 Science (@sciencemagazine)
 Cell (@CellCellPress)
 
