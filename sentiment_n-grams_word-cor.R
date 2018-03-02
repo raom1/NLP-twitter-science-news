@@ -35,7 +35,7 @@ unnest_text <- tweet_tbl %>%
   unnest_tokens(word, text) %>%
   filter(!word %in% stop_words$word)
 
-# SENTIMENT ANALYSIS
+# SENTIMENT ANALYSIS (http://uc-r.github.io/sentiment_analysis)
 
 #What are the most common sentiments across tweets? Use nrc sentiment set (assign to emotion group)
 unnest_text %>%
@@ -59,7 +59,7 @@ unnest_text %>%
   geom_bar(stat = "identity")
 
 
-# TF-IDF...just if you ever need it
+# TF-IDF...just if you ever need it (http://uc-r.github.io/tf-idf_analysis)
 tweet_tfidf <- unnest_text %>%
   count(tweet_number, word, sort = F) %>%
   ungroup()
@@ -71,7 +71,7 @@ tweet_tfidf %>%
   arrange(desc(tf_idf))
 
 
-#N-GRAMS
+#N-GRAMS (http://uc-r.github.io/word_relationships)
 
 # stopwords_regex = paste(stopwords('en'), collapse = '\\b|\\b')
 # stopwords_regex = paste0('\\b', stopwords_regex, '\\b')
@@ -128,15 +128,14 @@ ggraph(text_graph, layout = "fr") +
   theme_void()
 
 
-unnest_text
-
-pairwise_count(unnest_text, word, tweet_number, sort = TRUE)
+#WORD CORRELATION (http://uc-r.github.io/word_relationships)
 
 word_cor <- unnest_text %>%
-    group_by(word) %>%
-    #filter(n() >= 20) %>%
-    pairwise_cor(word, tweet_number) %>%
-    filter(!is.na(correlation))
+  group_by(word) %>%
+  filter(n() >= 10) %>%
+  pairwise_cor(word, tweet_number, method = "pearson") %>%
+  filter(!is.na(correlation),
+         correlation > .4)
 
 word_cor %>%
   arrange(desc(correlation))

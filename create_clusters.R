@@ -11,7 +11,7 @@ library(mclust)
 library(tidyverse)
 
 #load cleaned tweets
-load("~/Documents/Data Science Bootcamp/R/Twitter_R/search_corpus.Rdata")
+load("~/Documents/Data_Science_Bootcamp/R/Twitter_R/search_corpus.Rdata")
 
 #create matrix of words and tweets
 search_tdm <- TermDocumentMatrix(search_corpus)
