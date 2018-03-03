@@ -47,7 +47,7 @@ usernames <- c("nature",
 
 username_df <- twListToDF(lookupUsers(usernames))
 
-source("~/Documents/GIT/DS1/NLP-twitter-science-news/clean_text.R")
+source("~/Documents/GIT/DS1/NLP-twitter-science-news/functions.R")
 
 set.seed(123)
 
@@ -202,18 +202,27 @@ make_cluster_dataframe <- function(data_matrix, number_of_clusters) {
 }
 
 elbow_popular <- make_cluster_dataframe(popular_mat, k_elbow_popular)
+elbow_unpopular <- make_cluster_dataframe(unpopular_mat, k_elbow_unpopular)
+popular <- make_cluster_dataframe(popular_mat, 1)
+unpopular <- make_cluster_dataframe(unpopular_mat, 1)
+
+save(popular, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/popular.Rdata")
+save(unpopular, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/unpopular.Rdata")
 
 
 make_word_cloud <- function(cluster_number, df) {
   center <- filter(df, cluster == cluster_number)
-  wordcloud(center$terms, center$freq, scale = c(5, .1), colors = brewer.pal(6, "Dark2"))
+  wordcloud(center$terms, center$freq, max.words = 15, scale = c(5, .1), colors = brewer.pal(6, "Dark2"))
 }
 
 make_word_cloud(1, elbow_popular)
 make_word_cloud(2, elbow_popular)
 make_word_cloud(3, elbow_popular)
+popular_wordcloud <- make_word_cloud(1, popular)
+unpopular_wordcloud <- make_word_cloud(1, unpopular)
 
-
+save(popular_wordcloud, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/popular_wordcloud.Rdata")
+save(unpopular_wordcloud, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/unpopular_wordcloud.Rdata")
 
 
 
@@ -229,13 +238,44 @@ clean_text_no_tm <- function(text_col) {
     unname()
   tibble(tweet_number = 1:length(tweet_text), text = tweet_text) %>% 
     unnest_tokens(word, text) %>% 
-    filter(!word %in% stop_words$word)
+    filter(!word %in% stop_words$word) %>% 
+    filter(!word == "aicle") %>% 
+    filter(!word == "eah") %>% 
+    filter(!word == "amp")
 }
 
 
 popular_text <- clean_text_no_tm(top_10_percent$text)
 
+save(popular_text, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/popular_text.Rdata")
+
 unpopular_text <- clean_text_no_tm(bottom_90_percent$text)
+
+save(unpopular_text, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/unpopular_text.Rdata")
+
+
+make_wordcloud <- function(df) {
+  freq_df <- df %>%
+    filter(word != "false") %>% 
+    count(word, sort = TRUE)
+  wordcloud(freq_df$word,
+            freq_df$n,
+            max.words = 15,
+            scale = c(5, .1),
+            random.order = F,
+            colors = brewer.pal(6, "Dark2"))
+} 
+
+make_wordcloud(popular_text)
+    
+
+test_4 <- popular_text %>% 
+  filter(word != "false") %>% 
+  count(word, sort = TRUE) %>%
+  # wordcloud(words = word, freq = .$n, max.words = 15, scale = c(5, 0.1), colors = brewer.pal(6, "Dark2"))
+
+
+wordcloud(test_4$word, test_4$n, max.words = 15, scale = c(5, .1), random.order = F, colors = brewer.pal(6, "Dark2"))
 
 
 #What are the most common sentiments across tweets? Use nrc sentiment set (assign to emotion group)
@@ -258,35 +298,102 @@ ggplot(sentiments_unpopular, aes(x = sentiment, y = n)) +
 
 
 #What is the most common word with given sentiment? Use bing sentiment set (binary pos or neg)
-common_words_popular <- popular_text %>%
-  inner_join(get_sentiments("bing")) %>%
+# common_words_popular <- popular_text %>%
+#   inner_join(get_sentiments("bing")) %>%
+#   filter(word != "false") %>% 
+#   count(word, sentiment, sort = TRUE) %>%
+#   ungroup() %>% 
+#   mutate(percent = n/sum(n))
+# 
+# ggplot(head(common_words_popular, 10), aes(x = word, y = percent, fill = sentiment)) +
+#   geom_bar(stat = "identity") +
+#   scale_y_continuous(limits = c(0, 0.035)) +
+#   theme_bw()
+
+top_popular_words_sentiment <- popular_text %>% 
+  inner_join(get_sentiments("bing")) %>% 
   filter(word != "false") %>% 
-  count(word, sentiment, sort = TRUE) %>%
-  ungroup()
+  count(word, sentiment, sort = TRUE) %>% 
+  mutate(percent = n/sum(n)) %>% 
+  head(10) %>% 
+  ggplot(aes(x = word, y = percent, fill = sentiment)) +
+    geom_bar(stat = "identity") +
+    scale_y_continuous(limits = c(0, 0.035)) +
+    labs(
+      y = "Relative Frequency (word count/total words)",
+      x = "Word (alphabetical order)",
+      fill = "Sentiment"
+    ) +
+    theme_minimal()
 
-ggplot(head(common_words_popular, 10), aes(x = word, y = n, fill = sentiment)) +
-  geom_bar(stat = "identity")
+top_popular_words_sentiment
+  
+make_sentiment_graph <- function(df) {
+  df %>% 
+    inner_join(get_sentiments("bing")) %>% 
+    filter(word != "false") %>% 
+    count(word, sentiment, sort = TRUE) %>% 
+    mutate(percent = n/sum(n)) %>% 
+    head(10) %>% 
+    ggplot(aes(x = word, y = percent, fill = sentiment)) +
+      geom_bar(stat = "identity") +
+      scale_y_continuous(limits = c(0, 0.035)) +
+      theme_bw()
+}
 
-common_words_unpopular <- unpopular_text %>%
-  inner_join(get_sentiments("bing")) %>%
+make_sentiment_graph(popular_text)
+make_sentiment_graph(unpopular_text)
+
+save(top_popular_words_sentiment, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/top_popular_words_sentiment.Rdata")
+
+
+# common_words_unpopular <- unpopular_text %>%
+#   inner_join(get_sentiments("bing")) %>%
+#   filter(word != "false") %>% 
+#   count(word, sentiment, sort = TRUE) %>%
+#   ungroup() %>% 
+#   mutate(percent = n/sum(n))
+# 
+# ggplot(head(common_words_unpopular, 10), aes(x = word, y = percent, fill = sentiment)) +
+#   geom_bar(stat = "identity") +
+#   scale_y_continuous(limits = c(0, 0.035)) +
+#   theme_bw()
+
+top_unpopular_words_sentiment <- unpopular_text %>% 
+  inner_join(get_sentiments("bing")) %>% 
   filter(word != "false") %>% 
-  count(word, sentiment, sort = TRUE) %>%
-  ungroup()
+  count(word, sentiment, sort = TRUE) %>% 
+  mutate(percent = n/sum(n)) %>% 
+  head(10) %>% 
+  ggplot(aes(x = word, y = percent, fill = sentiment)) +
+    geom_bar(stat = "identity") +
+    scale_y_continuous(limits = c(0, 0.035)) +
+    labs(
+      y = "Relative Frequency (word count/total words)",
+      x = "Word (alphabetical order)",
+      fill = "Sentiment"
+    ) +
+    theme_minimal(base_size = 12)
 
-ggplot(head(common_words_unpopular, 10), aes(x = word, y = n, fill = sentiment)) +
-  geom_bar(stat = "identity")
+top_unpopular_words_sentiment
 
+save(top_unpopular_words_sentiment, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/top_unpopular_words_sentiment.Rdata")
 
 
 #WORD CORRELATION
-popular_word_cor <- popular_text %>%
+# popular_word_cor <- popular_text %>%
+#   group_by(word) %>%
+#   filter(n() >= 5) %>%
+#   pairwise_cor(word, tweet_number, method = "pearson") %>%
+#   filter(!is.na(correlation),
+#          correlation > .4)
+
+popular_bigram <- popular_text %>%
   group_by(word) %>%
   filter(n() >= 5) %>%
   pairwise_cor(word, tweet_number, method = "pearson") %>%
   filter(!is.na(correlation),
-         correlation > .4)
-
-popular_word_cor %>%
+         correlation > .4) %>%
   graph_from_data_frame() %>%
   ggraph(layout = "fr") +
   geom_edge_link(aes(edge_alpha = correlation), show.legend = FALSE) +
@@ -294,18 +401,47 @@ popular_word_cor %>%
   geom_node_text(aes(label = name), repel = TRUE) +
   theme_void()
 
+popular_bigram
 
-unpopular_word_cor <- unpopular_text %>%
+make_bigram_graph <- function(df, min_word_number) {
+  df %>% 
+    group_by(word) %>% 
+    filter(n >= min_word_number) %>% 
+    pairwise_cor(word, tweet_number, method = "pearson") %>% 
+    filter(!is.na(correlation),
+           correlation > 0.4) %>% 
+    graph_from_data_frame() %>% 
+    ggraph(layouy = "fr") +
+    geom_edge_link(aes(edge_alpha = correlation), show.legend = FALSE) +
+    geom_node_point(color = "lightblue", size = 5) +
+    geom_node_text(aes(label = name), repel = TRUE) +
+    theme_void()
+}
+
+# unpopular_word_cor <- unpopular_text %>%
+#   group_by(word) %>%
+#   filter(n() >= 15) %>%
+#   pairwise_cor(word, tweet_number, method = "pearson") %>%
+#   filter(!is.na(correlation),
+#          correlation > .4)
+
+unpopular_bigram <- unpopular_text %>%
   group_by(word) %>%
   filter(n() >= 15) %>%
   pairwise_cor(word, tweet_number, method = "pearson") %>%
   filter(!is.na(correlation),
-         correlation > .4)
-
-unpopular_word_cor %>%
+         correlation > .4) %>%
   graph_from_data_frame() %>%
   ggraph(layout = "fr") +
   geom_edge_link(aes(edge_alpha = correlation), show.legend = FALSE) +
   geom_node_point(color = "lightblue", size = 5) +
   geom_node_text(aes(label = name), repel = TRUE) +
   theme_void()
+
+unpopular_bigram
+
+save(popular_bigram, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/popular_bigram.Rdata")
+save(unpopular_bigram, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/unpopular_bigram.Rdata")
+
+
+

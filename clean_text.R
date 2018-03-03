@@ -8,7 +8,7 @@ library(stringr)
 
 clean_tweet_text <- function(df) {
   no_graph <- data.frame(text = str_replace_all(df$text, "[^[:graph:]]", " ")) 
-  VCorpus(VectorSource(as.vector(no_graph$text))) %>%
+  cleaned <- VCorpus(VectorSource(as.vector(no_graph$text))) %>%
     tm_map(content_transformer(tolower)) %>% 
     tm_map(content_transformer(function(x) gsub("(f|ht)tp(s?)://\\S+",
                                                                "",
@@ -16,10 +16,11 @@ clean_tweet_text <- function(df) {
                                                                perl=T))) %>% 
     tm_map(content_transformer(function(x) gsub("rt", "", x))) %>% 
     tm_map(content_transformer(function(x) gsub("@\\w+", "", x))) %>% 
-    tm_map(removeWords, words = c(stopwords("english"), "amp", "can", "new", "one", "get", "next", "now", "keep", "like", "made", "just", "big", "good", "may", "need", "time", "best", "ever", "way", "eah", "might", "see", "well", "getting", "ready", "two", "better", "cool", "many", "much", "never", "take", "got", "really", "back", "get", "great", "sure", "yes", "come", "know", "make", "says", "meet", "seen", "thing", "types", "use", "will")) %>% 
+    tm_map(removeWords, words = c(stopwords("english"), "aicle", "amp", "can", "new", "one", "get", "next", "now", "keep", "like", "made", "just", "big", "good", "may", "need", "time", "best", "ever", "way", "eah", "might", "see", "well", "getting", "ready", "two", "better", "cool", "many", "much", "never", "take", "got", "really", "back", "get", "great", "sure", "yes", "come", "know", "make", "says", "meet", "seen", "thing", "types", "use", "will")) %>% 
     tm_map(removePunctuation) %>% 
-    tm_map(removeNumbers) %>% 
-    tm_map(stemDocument)
+    tm_map(removeNumbers)
+  #tm_map(cleaned, stemDocument) #%>% 
+    #tm_map(stemCompletion(dictionary = cleaned))
 }
 
 #search_corpus <- clean_tweet_text(user_search_df)
