@@ -1,20 +1,20 @@
 library(tidytext)
 library(tidyverse)
 library(ggplot2)
-library(qdap)
-library(tm)
+#library(qdap)
+#library(tm)
 library(igraph)
 library(ggraph)
 library(widyr)
 library(twitteR)
-library(streamR)
+#library(streamR)
 library(RCurl)
 library(RJSONIO)
 library(stringr)
 library(ROAuth)
-library(proxy)
-library(mclust)
-library(RColorBrewer)
+#library(proxy)
+#library(mclust)
+#library(RColorBrewer)
 library(wordcloud)
 
 consumer_key <- "<Your_Counsumer_Key>"
@@ -52,9 +52,9 @@ source("~/Documents/GIT/DS1/NLP-twitter-science-news/functions.R")
 set.seed(123)
 
 #Load full text data frame
-load("~/Documents/GIT/DS1/NLP-twitter-science-news/data/user_search_full_022518.Rdata")
+load("~/Documents/GIT/DS1/NLP-twitter-science-news/data/user_search_full_030618.Rdata")
 
-tweets_followers <- left_join(user_search_full,
+tweets_followers <- left_join(user_search_full_030618,
                               username_df[,c("followersCount", "screenName")],
                               by = "screenName")
 
@@ -70,6 +70,8 @@ tweets_followers %>%
 popular_arrange <- tweets_followers %>% 
   filter(isRetweet == FALSE) %>%
   arrange(desc(norm_popular))
+
+save(popular_arrange, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/popular_arrange.Rdata")
 
 popular_cutoff <- round(nrow(popular_arrange)*0.1)
 
@@ -244,10 +246,48 @@ clean_text_no_tm <- function(text_col) {
     filter(!word == "amp")
 }
 
+my_stopwords <- c(stop_words$word, "aicle", "eah", "amp", "ou", "won't", "i'd", "mes", "ineff", "rcts", "sugg", "bn", "linehan", "al", "that's", "guo", "al", "fo", "liu", "it's", "mus")
+
+clean_text_no_tm_2 <- function(df) {
+  tweet_text <- str_replace_all(df$text, "[^[:graph:]]", " ") %>% 
+    tolower() %>% 
+    sapply(function(x) gsub("(f|ht)tp(s?)://\\S+", "", x, perl = T)) %>% 
+    sapply(function(x) gsub("[[:digit:]]", "", x)) %>% 
+    sapply(function(x) gsub("@\\w+", "", x)) %>% 
+    unname()
+  week_bins <- seq(as.POSIXct(as.character(min(popular_arrange$created))),
+                   as.POSIXct(as.character(max(popular_arrange$created))),
+                   by = "7 days")
+  tibble(tweet_number = df$id,
+         text = tweet_text,
+         created = df$created,
+         week_number = cut(created,
+                           breaks = c(week_bins, Inf),
+                           labels = c(1:length(week_bins)))) %>% 
+    unnest_tokens(word, text) %>% 
+    filter(!word %in% my_stopwords)
+}
+
+popular_text_date <- clean_text_no_tm_2(top_10_percent)
+
+View(popular_text_date)
+
+# popular_text_date <- popular_text_date %>% 
+#   mutate(week_number = cut(created,
+#                          breaks = c(seq(as.POSIXct(as.character(min(popular_arrange$created))),
+#                                       as.POSIXct(as.character(max(popular_arrange$created))),
+#                                       by = "7 days"), Inf),
+#                          labels = c(1, 2, 3, 4, 5, 6)))
+
+save(popular_text_date, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/popular_text_date.Rdata")
 
 popular_text <- clean_text_no_tm(top_10_percent$text)
 
 save(popular_text, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/popular_text.Rdata")
+
+unpopular_text_date <- clean_text_no_tm_2(bottom_90_percent)
+
+save(unpopular_text_date, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/unpopular_text_date.Rdata")
 
 unpopular_text <- clean_text_no_tm(bottom_90_percent$text)
 
@@ -258,15 +298,25 @@ make_wordcloud <- function(df) {
   freq_df <- df %>%
     filter(word != "false") %>% 
     count(word, sort = TRUE)
+  par(mar = rep(0, 4))
   wordcloud(freq_df$word,
             freq_df$n,
             max.words = 15,
-            scale = c(5, .1),
+            scale = c(8, .1),
             random.order = F,
+            use.r.layout = T,
             colors = brewer.pal(6, "Dark2"))
 } 
 
-make_wordcloud(popular_text)
+popular_text_date %>% 
+  filter(week_number == 1) %>% 
+  #View()
+  make_wordcloud()
+
+make_wordcloud(unpopular_text)
+
+test_weeks <- seq(as.POSIXct('2018-01-27 19:39:19'), as.POSIXct('2018-03-06 16:00:12'),
+                  by='7 days')
     
 
 test_4 <- popular_text %>% 
@@ -310,15 +360,16 @@ ggplot(sentiments_unpopular, aes(x = sentiment, y = n)) +
 #   scale_y_continuous(limits = c(0, 0.035)) +
 #   theme_bw()
 
-top_popular_words_sentiment <- popular_text %>% 
+top_popular_words_sentiment <- popular_text_date %>% 
   inner_join(get_sentiments("bing")) %>% 
   filter(word != "false") %>% 
+  filter(week_number == 6) %>%
   count(word, sentiment, sort = TRUE) %>% 
   mutate(percent = n/sum(n)) %>% 
   head(10) %>% 
   ggplot(aes(x = word, y = percent, fill = sentiment)) +
     geom_bar(stat = "identity") +
-    scale_y_continuous(limits = c(0, 0.035)) +
+    #scale_y_continuous(limits = c(0, 0.03)) +
     labs(
       y = "Relative Frequency (word count/total words)",
       x = "Word (alphabetical order)",
@@ -337,7 +388,7 @@ make_sentiment_graph <- function(df) {
     head(10) %>% 
     ggplot(aes(x = word, y = percent, fill = sentiment)) +
       geom_bar(stat = "identity") +
-      scale_y_continuous(limits = c(0, 0.035)) +
+      scale_y_continuous(limits = c(0, 0.03)) +
       theme_bw()
 }
 
@@ -359,15 +410,16 @@ save(top_popular_words_sentiment, file = "~/Documents/GIT/DS1/NLP-twitter-scienc
 #   scale_y_continuous(limits = c(0, 0.035)) +
 #   theme_bw()
 
-top_unpopular_words_sentiment <- unpopular_text %>% 
+top_unpopular_words_sentiment <- unpopular_text_date %>% 
   inner_join(get_sentiments("bing")) %>% 
   filter(word != "false") %>% 
+  filter(week_number == 6) %>%
   count(word, sentiment, sort = TRUE) %>% 
   mutate(percent = n/sum(n)) %>% 
   head(10) %>% 
   ggplot(aes(x = word, y = percent, fill = sentiment)) +
     geom_bar(stat = "identity") +
-    scale_y_continuous(limits = c(0, 0.035)) +
+    #scale_y_continuous(limits = c(0, 0.03)) +
     labs(
       y = "Relative Frequency (word count/total words)",
       x = "Word (alphabetical order)",
@@ -388,9 +440,10 @@ save(top_unpopular_words_sentiment, file = "~/Documents/GIT/DS1/NLP-twitter-scie
 #   filter(!is.na(correlation),
 #          correlation > .4)
 
-popular_bigram <- popular_text %>%
+popular_bigram <- popular_text_date %>%
   group_by(word) %>%
-  filter(n() >= 5) %>%
+  filter(week_number == 6) %>% 
+  filter(n() >= 3) %>%
   pairwise_cor(word, tweet_number, method = "pearson") %>%
   filter(!is.na(correlation),
          correlation > .4) %>%
@@ -425,9 +478,10 @@ make_bigram_graph <- function(df, min_word_number) {
 #   filter(!is.na(correlation),
 #          correlation > .4)
 
-unpopular_bigram <- unpopular_text %>%
+unpopular_bigram <- unpopular_text_date %>%
   group_by(word) %>%
-  filter(n() >= 15) %>%
+  filter(week_number == 6) %>% 
+  filter(n() >= 8) %>%
   pairwise_cor(word, tweet_number, method = "pearson") %>%
   filter(!is.na(correlation),
          correlation > .4) %>%
