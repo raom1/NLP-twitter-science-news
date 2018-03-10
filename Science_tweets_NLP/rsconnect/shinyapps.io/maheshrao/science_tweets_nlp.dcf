@@ -1,0 +1,10 @@
+name: science_tweets_nlp
+title:
+username:
+account: maheshrao
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 297250
+bundleId: 1262779
+url: https://maheshrao.shinyapps.io/science_tweets_nlp/
+when: 1520724240.0729

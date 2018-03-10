@@ -1,13 +1,5 @@
-#
-# This is the server logic of a Shiny web application. You can run the 
-# application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-# 
-#    http://shiny.rstudio.com/
-#
-
 library(shiny)
+library(shinythemes)
 library(ggplot2)
 library(tidyverse)
 library(wordcloud)
@@ -16,13 +8,18 @@ library(widyr)
 library(igraph)
 library(ggraph)
 
-load("~/Documents/GIT/DS1/NLP-twitter-science-news/data/popular_text_date.Rdata")
-load("~/Documents/GIT/DS1/NLP-twitter-science-news/data/unpopular_text_date.Rdata")
+load("./Data/popular_text_date.Rdata")
+load("./Data/unpopular_text_date.Rdata")
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
   
+  # Render options for Popular Plot area
+  
   output$popular_plot <- renderPlot({
+    
+    # Set condition when and how Popular Wordcloud will be rendered
+    
     if (input$select_visualization == "Wordcloud") {
       wc_df_popular <- popular_text_date
       if (input$select_week != "All") {
@@ -38,6 +35,9 @@ shinyServer(function(input, output) {
                 random.order = F,
                 colors = brewer.pal(6, "Dark2"))
     }
+    
+    # Set condition when Popular Sentiment graph will be rendered
+    
     if (input$select_visualization == "Sentiment") {
       popular_sentiment <- popular_text_date %>% 
         inner_join(get_sentiments("bing")) %>% 
@@ -61,6 +61,9 @@ shinyServer(function(input, output) {
         theme(axis.text.x = element_text(angle = 45, hjust = 1))
       return(popular_sentiment)
     }
+    
+    # Set condition when Popular Word Correlation will be rendered
+    
     if (input$select_visualization == "Word Correlation") {
       popular_word_corr <- popular_text_date %>% 
         group_by(word)
@@ -83,7 +86,13 @@ shinyServer(function(input, output) {
         theme_void()
     }
   })
+  
+  # Render options for Unpopular Plot area
+  
   output$unpopular_plot <- renderPlot({
+    
+    # Set condition when and how Unpopular Wordcloud will be rendered
+    
     if (input$select_visualization == "Wordcloud") {
       wc_df_unpopular <- unpopular_text_date
       if (input$select_week != "All") {
@@ -99,6 +108,9 @@ shinyServer(function(input, output) {
                 random.order = F,
                 colors = brewer.pal(6, "Dark2"))
     }
+    
+    # Set condition when and how Unpopular Sentiment graph will be rendered
+    
     if (input$select_visualization == "Sentiment") {
       unpopular_sentiment <- unpopular_text_date %>% 
         inner_join(get_sentiments("bing")) %>% 
@@ -122,6 +134,9 @@ shinyServer(function(input, output) {
         theme(axis.text.x = element_text(angle = 45, hjust = 1))
       return(unpopular_sentiment)
     }
+    
+    # Set condition when and how Unpopular Word Correlation will be rendered
+    
     if (input$select_visualization == "Word Correlation") {
       unpopular_word_corr <- unpopular_text_date %>% 
         group_by(word)
