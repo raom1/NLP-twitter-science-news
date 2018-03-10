@@ -11,6 +11,10 @@ library(shiny)
 library(ggplot2)
 library(tidyverse)
 library(wordcloud)
+library(tidytext)
+library(widyr)
+library(igraph)
+library(ggraph)
 
 load("~/Documents/GIT/DS1/NLP-twitter-science-news/data/popular_text_date.Rdata")
 load("~/Documents/GIT/DS1/NLP-twitter-science-news/data/unpopular_text_date.Rdata")
@@ -29,8 +33,8 @@ shinyServer(function(input, output) {
       par(mar = rep(0, 4))
       wordcloud(wc_df_popular$word,
                 wc_df_popular$n,
-                max.words = 27,
-                scale = c(4, .1),
+                max.words = 40,
+                scale = c(7, .1),
                 random.order = F,
                 colors = brewer.pal(6, "Dark2"))
     }
@@ -45,15 +49,15 @@ shinyServer(function(input, output) {
         count(word, sentiment, sort = TRUE) %>% 
         mutate(percent = n/sum(n)) %>% 
         head(10) %>% 
-        ggplot(aes(x = word, y = percent, fill = sentiment)) +
+        ggplot(aes(x = reorder(word, -percent), y = percent, fill = sentiment)) +
         geom_bar(stat = "identity") +
         scale_y_continuous(limits = c(0, 0.08)) +
         labs(
           y = "Relative Frequency\n(word count/total words)",
-          x = "Word (alphabetical order)",
+          x = NULL,
           fill = "Sentiment"
         ) +
-        theme_minimal(base_size = 24) +
+        theme_minimal(base_size = 30) +
         theme(axis.text.x = element_text(angle = 45, hjust = 1))
       return(popular_sentiment)
     }
@@ -65,7 +69,7 @@ shinyServer(function(input, output) {
           filter(n() >= 3)
       }
       if (input$select_week == "All") {
-        popular_word_corr <- filter(popular_word_corr, n() >= 7)
+        popular_word_corr <- filter(popular_word_corr, n() >= 8)
       }
       popular_word_corr %>% 
         pairwise_cor(word, tweet_number, method = "pearson") %>%
@@ -90,8 +94,8 @@ shinyServer(function(input, output) {
       par(mar = rep(0, 4))
       wordcloud(wc_df_unpopular$word,
                 wc_df_unpopular$n,
-                max.words = 27,
-                scale = c(4, .1),
+                max.words = 40,
+                scale = c(7, .1),
                 random.order = F,
                 colors = brewer.pal(6, "Dark2"))
     }
@@ -106,15 +110,15 @@ shinyServer(function(input, output) {
         count(word, sentiment, sort = TRUE) %>% 
         mutate(percent = n/sum(n)) %>% 
         head(10) %>% 
-        ggplot(aes(x = word, y = percent, fill = sentiment)) +
+        ggplot(aes(x = reorder(word, -percent), y = percent, fill = sentiment)) +
         geom_bar(stat = "identity") +
         scale_y_continuous(limits = c(0, 0.08)) +
         labs(
           y = "Relative Frequency\n(word count/total words)",
-          x = "Word (alphabetical order)",
+          x = NULL,
           fill = "Sentiment"
         ) +
-        theme_minimal(base_size = 24) +
+        theme_minimal(base_size = 30) +
         theme(axis.text.x = element_text(angle = 45, hjust = 1))
       return(unpopular_sentiment)
     }
@@ -123,10 +127,10 @@ shinyServer(function(input, output) {
         group_by(word)
       if (input$select_week != "All") {
         unpopular_word_corr <- filter(unpopular_word_corr, week_number == input$select_week) %>% 
-          filter(n() >= 8)
+          filter(n() >= 9)
       }
       if (input$select_week == "All") {
-        unpopular_word_corr <- filter(unpopular_word_corr, n() >= 20)
+        unpopular_word_corr <- filter(unpopular_word_corr, n() >= 25)
       }
       unpopular_word_corr %>% 
         pairwise_cor(word, tweet_number, method = "pearson") %>%

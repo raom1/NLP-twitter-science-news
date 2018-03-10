@@ -8,34 +8,39 @@
 #
 
 library(shiny)
+library(shinythemes)
 
 # Define UI for application that draws a histogram
-shinyUI(fluidPage(style = "background-color: #FFF8ED;",
+shinyUI(fluidPage(theme = shinythemes::shinytheme("superhero"),
   fluidRow(
     column(12,
-           h3("Examining the Popularity of Science Topics through Twitter Data Analysis"),
-           fluidRow(
+           h1("Examining the Popularity of Science Topics through Twitter Data Analysis"),
+  fluidRow(
              column(6,
                     selectInput(inputId = "select_visualization",
-                                label = "Select Visualization",
+                                label = h3("Select Visualization"),
                                 choices = list("Wordcloud", "Sentiment", "Word Correlation"),
                                 selected = "Wordcloud")),
              column(6,
                     radioButtons(inputId = "select_week",
-                                 label = "Select Week",
+                                 label = h3("Select Week"),
                                  choices = c("All", 1, 2, 3, 4, 5, 6),
                                  selected = "All",
                                  inline = T))
            ),
-           fluidRow(
+  fluidRow(
              column(6,
-                    h4("Popular Tweets"),
-                    plotOutput("popular_plot"),
-                    style='padding:2px;height:100%;'
+                    div(style = "height:750px;",
+                    h2("Popular Tweets"),
+                    plotOutput("popular_plot", width = "100%", height = "95%")
+                    )
              ),
              column(6,
-                    h4("Unpopular Tweets"),
-                    plotOutput("unpopular_plot"),
-                    style='padding:2px;height:100%;'
+                    div(style = "height:750px;",
+                    h2("Unpopular Tweets"),
+                    plotOutput("unpopular_plot", width = "100%", height = "95%")
+                    )
              )
            )))))
+
+

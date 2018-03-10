@@ -53,8 +53,9 @@ set.seed(123)
 
 #Load full text data frame
 load("~/Documents/GIT/DS1/NLP-twitter-science-news/data/user_search_full_030618.Rdata")
+load("~/Documents/GIT/DS1/NLP-twitter-science-news/data/user_search_full_030918.Rdata")
 
-tweets_followers <- left_join(user_search_full_030618,
+tweets_followers <- left_join(user_search_full_030918,
                               username_df[,c("followersCount", "screenName")],
                               by = "screenName")
 
@@ -71,7 +72,9 @@ popular_arrange <- tweets_followers %>%
   filter(isRetweet == FALSE) %>%
   arrange(desc(norm_popular))
 
-save(popular_arrange, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/popular_arrange.Rdata")
+#save(popular_arrange, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/popular_arrange.Rdata")
+
+load("~/Documents/GIT/DS1/NLP-twitter-science-news/data/popular_arrange.Rdata")
 
 popular_cutoff <- round(nrow(popular_arrange)*0.1)
 
@@ -281,17 +284,19 @@ View(popular_text_date)
 
 save(popular_text_date, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/popular_text_date.Rdata")
 
-popular_text <- clean_text_no_tm(top_10_percent$text)
-
-save(popular_text, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/popular_text.Rdata")
+# load("~/Documents/GIT/DS1/NLP-twitter-science-news/data/popular_text_date.Rdata")
+# 
+# popular_text <- clean_text_no_tm(top_10_percent$text)
+# 
+# save(popular_text, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/popular_text.Rdata")
 
 unpopular_text_date <- clean_text_no_tm_2(bottom_90_percent)
 
 save(unpopular_text_date, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/unpopular_text_date.Rdata")
 
-unpopular_text <- clean_text_no_tm(bottom_90_percent$text)
-
-save(unpopular_text, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/unpopular_text.Rdata")
+# unpopular_text <- clean_text_no_tm(bottom_90_percent$text)
+# 
+# save(unpopular_text, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/unpopular_text.Rdata")
 
 
 make_wordcloud <- function(df) {
@@ -301,8 +306,8 @@ make_wordcloud <- function(df) {
   par(mar = rep(0, 4))
   wordcloud(freq_df$word,
             freq_df$n,
-            max.words = 15,
-            scale = c(8, .1),
+            max.words = 60,
+            scale = c(5.5, .1),
             random.order = F,
             use.r.layout = T,
             colors = brewer.pal(6, "Dark2"))
@@ -363,19 +368,21 @@ ggplot(sentiments_unpopular, aes(x = sentiment, y = n)) +
 top_popular_words_sentiment <- popular_text_date %>% 
   inner_join(get_sentiments("bing")) %>% 
   filter(word != "false") %>% 
-  filter(week_number == 6) %>%
+  #filter(week_number == 6) %>%
   count(word, sentiment, sort = TRUE) %>% 
+  #View()
   mutate(percent = n/sum(n)) %>% 
   head(10) %>% 
-  ggplot(aes(x = word, y = percent, fill = sentiment)) +
+  ggplot(aes(x = reorder(word, -percent), y = percent, fill = sentiment)) +
     geom_bar(stat = "identity") +
     #scale_y_continuous(limits = c(0, 0.03)) +
     labs(
-      y = "Relative Frequency (word count/total words)",
-      x = "Word (alphabetical order)",
-      fill = "Sentiment"
+      y = NULL,
+      x = NULL,
+      fill = NULL
     ) +
-    theme_minimal()
+  theme(legend.position = "none") +
+  theme_void(base_size = 30)
 
 top_popular_words_sentiment
   
@@ -442,7 +449,7 @@ save(top_unpopular_words_sentiment, file = "~/Documents/GIT/DS1/NLP-twitter-scie
 
 popular_bigram <- popular_text_date %>%
   group_by(word) %>%
-  filter(week_number == 6) %>% 
+  filter(week_number == 1) %>% 
   filter(n() >= 3) %>%
   pairwise_cor(word, tweet_number, method = "pearson") %>%
   filter(!is.na(correlation),
@@ -451,7 +458,7 @@ popular_bigram <- popular_text_date %>%
   ggraph(layout = "fr") +
   geom_edge_link(aes(edge_alpha = correlation), show.legend = FALSE) +
   geom_node_point(color = "lightblue", size = 5) +
-  geom_node_text(aes(label = name), repel = TRUE) +
+  #geom_node_text(aes(label = name), repel = TRUE, size = 6.5) +
   theme_void()
 
 popular_bigram
@@ -497,5 +504,5 @@ unpopular_bigram
 save(popular_bigram, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/popular_bigram.Rdata")
 save(unpopular_bigram, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/unpopular_bigram.Rdata")
 
-
+my_pal <- (rainbow(27))
 
