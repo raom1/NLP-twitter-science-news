@@ -5,6 +5,6 @@ account: maheshrao
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 297250
-bundleId: 1262779
+bundleId: 1436587
 url: https://maheshrao.shinyapps.io/science_tweets_nlp/
-when: 1520724240.0729
+when: 1529378769.61271

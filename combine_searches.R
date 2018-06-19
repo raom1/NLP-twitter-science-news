@@ -11,17 +11,23 @@ load("~/Documents/GIT/DS1/NLP-twitter-science-news/data/user_search_full_030618.
 
 #df2_unique <- anti_join(user_search_df_2, user_search_df, by = "id")
 
-df2_unique <- anti_join(user_search_df_6, user_search_full_030618)
+df_unique <- anti_join(user_search_df_7, user_search_df_9)
+
+df_new <- bind_rows(df_unique, user_search_df_9)
+
+df2_unique <- anti_join(df_new, user_search_full_030918)
 
 #user_search_full <- bind_rows(user_search_df, df2_unique, user_search_df_3, user_search_df_4)
 
-user_search_full_030918 <- bind_rows(user_search_full_030618, df2_unique)
+user_search_full <- bind_rows(user_search_full_030918, df2_unique)
 
 save(user_search_full, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/user_search_full_022518.Rdata")
 
 save(user_search_full_030618, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/user_search_full_030618.Rdata")
 
 save(user_search_full_030918, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/user_search_full_030918.Rdata")
+
+save(user_search_full, file = "~/Documents/GIT/DS1/NLP-twitter-science-news/data/user_search_full.Rdata")
 
 #Check how complet the data are. Expect a solid line at 45 degree angle. 
 #Breaks mean uncollected data. There are a few spots where thats the case.

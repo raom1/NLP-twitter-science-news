@@ -1,22 +1,24 @@
-library(shiny)
-library(shinythemes)
-library(ggplot2)
-library(tidyverse)
-library(wordcloud)
-library(tidytext)
-library(widyr)
-library(igraph)
-library(ggraph)
 
-load("./Data/popular_text_date.Rdata")
-load("./Data/unpopular_text_date.Rdata")
+counts = plyr::count(popular_text_date, 'word') %>% 
+  arrange(desc(freq)) %>% 
+  .[1:round(nrow(.)*.1),] %>% 
+  select("freq")
 
-# Define server logic required to draw a histogram
+pop_thresh <- round(mean(counts$freq))
+
+counts_2 <- plyr::count(unpopular_text_date, 'word') %>% 
+  arrange(desc(freq)) %>% 
+  .[1:round(nrow(.)*.1),] %>% 
+  select("freq")
+
+unpop_thresh <- round(mean(counts_2$freq))
+
 shinyServer(function(input, output) {
   
   # Render options for Popular Plot area
   
   output$popular_plot <- renderPlot({
+    req(input$select_users)
     
     # Set condition when and how Popular Wordcloud will be rendered
     
@@ -26,7 +28,8 @@ shinyServer(function(input, output) {
         wc_df_popular <- filter(popular_text_date, week_number == input$select_week)
       }
       wc_df_popular <- wc_df_popular %>% 
-        count(word, sort = TRUE)
+        filter(screen_name %in% input$select_users) %>% 
+        dplyr::count(word, sort = TRUE)
       par(mar = rep(0, 4))
       wordcloud(wc_df_popular$word,
                 wc_df_popular$n,
@@ -46,7 +49,8 @@ shinyServer(function(input, output) {
         popular_sentiment <- filter(popular_sentiment, week_number == input$select_week)
       }
       popular_sentiment <- popular_sentiment %>% 
-        count(word, sentiment, sort = TRUE) %>% 
+        filter(screen_name %in% input$select_users) %>%
+        dplyr::count(word, sentiment, sort = TRUE) %>% 
         mutate(percent = n/sum(n)) %>% 
         head(10) %>% 
         ggplot(aes(x = reorder(word, -percent), y = percent, fill = sentiment)) +
@@ -72,9 +76,10 @@ shinyServer(function(input, output) {
           filter(n() >= 3)
       }
       if (input$select_week == "All") {
-        popular_word_corr <- filter(popular_word_corr, n() >= 8)
+        popular_word_corr <- filter(popular_word_corr, n() >= pop_thresh)
       }
       popular_word_corr %>% 
+        filter(screen_name %in% input$select_users) %>%
         pairwise_cor(word, tweet_number, method = "pearson") %>%
         filter(!is.na(correlation),
                correlation > .4) %>%
@@ -90,6 +95,7 @@ shinyServer(function(input, output) {
   # Render options for Unpopular Plot area
   
   output$unpopular_plot <- renderPlot({
+    req(input$select_users)
     
     # Set condition when and how Unpopular Wordcloud will be rendered
     
@@ -99,7 +105,8 @@ shinyServer(function(input, output) {
         wc_df_unpopular <- filter(wc_df_unpopular, week_number == input$select_week)
       }
       wc_df_unpopular <- wc_df_unpopular %>% 
-        count(word, sort = TRUE)
+        filter(screen_name %in% input$select_users) %>%
+        dplyr::count(word, sort = TRUE)
       par(mar = rep(0, 4))
       wordcloud(wc_df_unpopular$word,
                 wc_df_unpopular$n,
@@ -119,7 +126,8 @@ shinyServer(function(input, output) {
         unpopular_sentiment <- filter(unpopular_sentiment, week_number == input$select_week)
       }
       unpopular_sentiment <- unpopular_sentiment %>% 
-        count(word, sentiment, sort = TRUE) %>% 
+        filter(screen_name %in% input$select_users) %>%
+        dplyr::count(word, sentiment, sort = TRUE) %>% 
         mutate(percent = n/sum(n)) %>% 
         head(10) %>% 
         ggplot(aes(x = reorder(word, -percent), y = percent, fill = sentiment)) +
@@ -145,9 +153,10 @@ shinyServer(function(input, output) {
           filter(n() >= 9)
       }
       if (input$select_week == "All") {
-        unpopular_word_corr <- filter(unpopular_word_corr, n() >= 25)
+        unpopular_word_corr <- filter(unpopular_word_corr, n() >= unpop_thresh)
       }
       unpopular_word_corr %>% 
+        filter(screen_name %in% input$select_users) %>%
         pairwise_cor(word, tweet_number, method = "pearson") %>%
         filter(!is.na(correlation),
                correlation > .4) %>%

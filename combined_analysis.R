@@ -47,15 +47,14 @@ usernames <- c("nature",
 
 username_df <- twListToDF(lookupUsers(usernames))
 
-source("~/Documents/GIT/DS1/NLP-twitter-science-news/functions.R")
+#source("~/Documents/GIT/DS1/NLP-twitter-science-news/functions.R")
 
 set.seed(123)
 
 #Load full text data frame
-load("~/Documents/GIT/DS1/NLP-twitter-science-news/data/user_search_full_030618.Rdata")
-load("~/Documents/GIT/DS1/NLP-twitter-science-news/data/user_search_full_030918.Rdata")
+load("~/Documents/GIT/DS1/NLP-twitter-science-news/data/user_search_full.Rdata")
 
-tweets_followers <- left_join(user_search_full_030918,
+tweets_followers <- left_join(user_search_full,
                               username_df[,c("followersCount", "screenName")],
                               by = "screenName")
 
@@ -63,10 +62,10 @@ tweets_followers$norm_popular <- ((tweets_followers$favoriteCount + tweets_follo
 
 # TAKE OUT RETWEETS?? I think yes.
 
-tweets_followers %>% 
-  filter(isRetweet == FALSE) %>% 
-  ggplot(aes(x = reorder(id, -norm_popular), y = norm_popular)) +
-  geom_bar(stat = "identity")
+# tweets_followers %>% 
+#   filter(isRetweet == FALSE) %>% 
+#   ggplot(aes(x = reorder(id, -norm_popular), y = norm_popular)) +
+#   geom_bar(stat = "identity")
 
 popular_arrange <- tweets_followers %>% 
   filter(isRetweet == FALSE) %>%
@@ -262,6 +261,7 @@ clean_text_no_tm_2 <- function(df) {
                    as.POSIXct(as.character(max(popular_arrange$created))),
                    by = "7 days")
   tibble(tweet_number = df$id,
+         screen_name = df$screenName,
          text = tweet_text,
          created = df$created,
          week_number = cut(created,
@@ -471,7 +471,7 @@ make_bigram_graph <- function(df, min_word_number) {
     filter(!is.na(correlation),
            correlation > 0.4) %>% 
     graph_from_data_frame() %>% 
-    ggraph(layouy = "fr") +
+    ggraph(layout = "fr") +
     geom_edge_link(aes(edge_alpha = correlation), show.legend = FALSE) +
     geom_node_point(color = "lightblue", size = 5) +
     geom_node_text(aes(label = name), repel = TRUE) +
