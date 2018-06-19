@@ -1,12 +1,11 @@
 # NLP-twitter-science-news
-Using text mining on selected tweets to identify what science stories are most popular
+Using natural language processing on tweets from selected users to identify what science stories are most popular
 
 ### This Repo is under construction
 
 ## Summary
-The overarching goal of this project is to gain a deeper, more quantitative understanding of the interpretation of popular 
-science news stories. This stems from the notoriously difficult task of reporting on scientific findings. Balancing amongst 
-generating excitement, managing expectations, and including important but mundane details is challenging. Twitter a provides
+The overarching goal of this project is to gain a deeper, more quantitative understanding of how science news stories are received. This stems from the notoriously difficult task of reporting on scientific findings. Balancing 
+generating excitement, managing expectations, and including important but mundane details is challenging. Twitter provides
 a simple paradigm for studying what kinds of stories are reported and how they are preceived by consumers.
 
 ## Bite sized questions:
@@ -30,7 +29,7 @@ NASA (@NASA)
 NIH (@NIH)
 The Smithsonian (@smithsonian)
 
-News outlets (or their science reporting):
+Science branch of popular news outlets:
 NYT Science Times (@NYTScience)
 NPR Science Desk (@nprscience)
 Scientific American (@sciam)
@@ -39,7 +38,6 @@ WIRED (@WIRED)
 Reputable scientists active on twitter:
 Neil DeGrasse Tyson (@neiltyson)
 Ben Goldacre (@bengoldacre)
-Hans Rosling (@hansrosling)
 
 ### Which stories are most popular?
 An easy first step is figureing out which stories are most popular amoung twitter users. Figuring this out can help set the
