@@ -15,30 +15,30 @@ twitter users. The results of this analysis are available as a shiny app availab
 There are a lot of tweets about science, so to make the search a little easier I selected some users to follow that tweet 
 about science news. Here's the list:
 
-Scientific journals (based on impact factor):
-Nature (@nature)
-Science (@sciencemagazine)
-Cell (@CellCellPress)
-
-Medical journals (based on impact factor):
-New England Journal of Medicine (@NEJM)
-Journal of the American Medical Association (@JAMA_current)
-The Lancet (@TheLancet)
-
-(US) Government funded organizations: 
-NASA (@NASA)
-NIH (@NIH)
-The Smithsonian (@smithsonian)
-
-Science branch of popular news outlets:
-NYT Science Times (@NYTScience)
-NPR Science Desk (@nprscience)
-Scientific American (@sciam)
-WIRED (@WIRED)
-
-Reputable scientists active on twitter:
-Neil DeGrasse Tyson (@neiltyson)
-Ben Goldacre (@bengoldacre)
+Scientific journals (based on impact factor): <br>
+Nature (@nature)<br>
+Science (@sciencemagazine)<br>
+Cell (@CellCellPress)<br>
+<br>
+Medical journals (based on impact factor):<br>
+New England Journal of Medicine (@NEJM)<br>
+Journal of the American Medical Association (@JAMA_current)<br>
+The Lancet (@TheLancet)<br>
+<br>
+(US) Government funded organizations: <br>
+NASA (@NASA)<br>
+NIH (@NIH)<br>
+The Smithsonian (@smithsonian)<br>
+<br>
+Science branch of popular news outlets:<br>
+NYT Science Times (@NYTScience)<br>
+NPR Science Desk (@nprscience)<br>
+Scientific American (@sciam)<br>
+WIRED (@WIRED)<br>
+<br>
+Reputable scientists active on twitter:<br>
+Neil DeGrasse Tyson (@neiltyson)<br>
+Ben Goldacre (@bengoldacre)<br>
 
 ### Which tweets to study?
 In order to study only original tweets, retweets were excluded from analysis
