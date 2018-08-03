@@ -57,3 +57,4 @@ clean_text_no_tm <- function(df) {
 popular_text_date <- clean_text_no_tm(top_10_percent)#[1:10000, ]
 
 unpopular_text_date <- clean_text_no_tm(bottom_90_percent)#[1:10000, ]
+
