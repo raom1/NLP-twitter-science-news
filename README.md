@@ -71,7 +71,7 @@ as to topics that are more prevalent in popular or unpopular tweets.
 
 #### Sentiment Analysis
 Sentiment analysis was performed and the most frequent words in each group and their associated positive or negative sentiment
-were displayed in a bar chart. Comparisons can then be made to see if a particular group is more often positive or negative.
+were displayed in a bar chart. Comparisons can then be made to see if a particular group is more often positive or negative.<br>
 ![sentiment](/images/sentiment.png)
 
 #### Word Correlation
@@ -79,7 +79,7 @@ Looking at individual words doesn't always give the complete picture of the cont
 correlations were made for each word pair in each group. Correlations were based on how often two words appered next to each
 other versus how often each word appeared independently. A visualization was then prepared to display correlations and
 represented groups of related words that could be placed into topics. Popular and unpopular tweets could then be compared to
-identify stories or topics that were more common in popular versus unpopular tweets.
+identify stories or topics that were more common in popular versus unpopular tweets.<br>
 ![word_correlation](/images/Word_correlation.png)
 
 ### How to interact with the data?
