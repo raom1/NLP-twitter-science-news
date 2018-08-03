@@ -1,4 +1,4 @@
-# NLP-twitter-science-news
+# NLP twitter science news
 Using natural language processing on tweets from selected users to identify what science stories are most popular
 
 ## Summary
