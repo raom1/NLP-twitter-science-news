@@ -11,7 +11,7 @@ twitter users. The results of this analysis are available as a shiny app availab
 
 ## Bite sized questions:
 
-### Which tweets?
+### Which users?
 There are a lot of tweets about science, so to make the search a little easier I selected some users to follow that tweet 
 about science news. Here's the list:
 
@@ -67,6 +67,7 @@ differences between popular and unpopular tweets.
 Wordclouds were created for popular and unpopular tweets. The wordclouds were based on the frequency of words in each category
 with larger words representing greater frequency. By comparing the most frequent words in each category trends can be observed
 as to topics that are more prevalent in popular or unpopular tweets.
+![wordcloud_image](/images/wordcloud.png)
 
 #### Sentiment Analysis
 Sentiment analysis was performed and the most frequent words in each group and their associated positive or negative sentiment
