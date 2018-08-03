@@ -7,7 +7,7 @@ received. This stems from the notoriously difficult task of reporting on scienti
 managing expectations, and including important but mundane details is challenging. Twitter provides a simple paradigm for
 studying what kinds of stories are reported and how they are preceived by consumers. An intial analysis of what differentiates
 popular versus unpopular tweets about science news can help to identify particular topics that are of greater interest to
-twitter users. The results of this analysis are available as a shiny app available <a href="https://maheshrao.shinyapps.io/science_tweets_nlp/" target="_blank">here</a>.
+twitter users. The results of this analysis are available as a shiny app <a href="https://maheshrao.shinyapps.io/science_tweets_nlp/" target="_blank">here</a>.
 
 ## Bite sized questions:
 
